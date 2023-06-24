@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:6.0
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: trips
+    ports:
+      - 27017:27017
+    volumes:
+      - database-data:/data/db
+    networks:
+      - app_net
+
+  web: &web
+    volumes:
+      - tmp-dir:/tmp
+    depends_on:
+      - mongodb
+    ports:
+      - "4000:4000"
+    networks:
+      - app_net
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/trips
+      - PORT=4000
+
+volumes:
+  database-data:
+  tmp-dir:
+    driver: local
+
+networks:
+  app_net:
+    driver: bridge
